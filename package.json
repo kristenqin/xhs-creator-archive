@@ -1,0 +1,27 @@
+{
+  "name": "xhs-creator-archive",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal-first creator archive tool for turning XHS creator content snapshots into offline PDFs.",
+  "scripts": {
+    "collect": "tsx src/cli/index.ts collect",
+    "export:pdf": "tsx src/cli/index.ts export pdf",
+    "dev": "tsx src/cli/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "archive",
+    "pdf",
+    "xhs",
+    "xiaohongshu",
+    "read-it-later"
+  ],
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
+
