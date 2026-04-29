@@ -1,4 +1,5 @@
-import { createCreatorDraft } from "../core/project.js";
+import { collectCreator } from "../collectors/xhsCollector.js";
+import { exportCreatorPdf } from "../exporters/pdfExporter.js";
 
 const [, , command, subCommandOrArg, ...rest] = process.argv;
 
@@ -11,7 +12,7 @@ Usage:
   npm run export:pdf -- --creator <creator-id>
 
 Current status:
-  Project scaffold is ready. Collector and PDF exporter will be implemented next.
+  Phase 1 local archive flow is available with sample content output.
 `);
 }
 
@@ -28,23 +29,40 @@ async function main(): Promise<void> {
       throw new Error("Missing creator profile URL.");
     }
 
-    const draft = createCreatorDraft(profileUrl);
-    console.log("Creator archive draft:");
-    console.log(JSON.stringify(draft, null, 2));
-    console.log("Collector implementation will be added in the next development step.");
+    const result = await collectCreator({
+      profileUrl
+    });
+
+    console.log(`Created local archive for ${result.creator.nickname} (${result.creator.id})`);
+    console.log(`Archive path: ${result.archiveRoot}`);
+    console.log(`Saved notes: ${result.notes.length}`);
+    console.log("Collector is currently running in sample archive mode.");
     return;
   }
 
   if (command === "export" && subCommandOrArg === "pdf") {
     const creatorFlagIndex = rest.indexOf("--creator");
     const creatorId = creatorFlagIndex >= 0 ? rest.at(creatorFlagIndex + 1) : undefined;
+    const templateFlagIndex = rest.indexOf("--template");
+    const templateValue = templateFlagIndex >= 0 ? rest.at(templateFlagIndex + 1) : undefined;
 
     if (!creatorId) {
       throw new Error("Missing --creator <creator-id>.");
     }
 
-    console.log(`PDF export requested for creator: ${creatorId}`);
-    console.log("PDF exporter implementation will be added in the next development step.");
+    if (templateValue && templateValue !== "timeline" && templateValue !== "print-compact") {
+      throw new Error("Invalid --template value. Use timeline or print-compact.");
+    }
+
+    const result = await exportCreatorPdf({
+      creatorId,
+      template: templateValue
+    });
+
+    console.log(`Exported book for creator: ${creatorId}`);
+    console.log(`HTML path: ${result.htmlPath}`);
+    console.log(`PDF path: ${result.pdfPath}`);
+    console.log("Current PDF output is a placeholder file. Use the HTML file for layout review.");
     return;
   }
 
@@ -56,4 +74,3 @@ main().catch((error: unknown) => {
   console.error(message);
   process.exitCode = 1;
 });
-

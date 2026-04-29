@@ -2,7 +2,7 @@
 
 一个面向个人使用的“小红书优质博主离线归档成书工具”项目骨架。
 
-当前阶段先把需求、边界和工程结构固定下来，后续再逐步实现采集、归档、阅读和 PDF 导出能力。
+当前阶段已经进入第一版原型：可以生成样例归档，并导出可打印 HTML 书稿和占位 PDF 文件，后续再逐步接入真实采集。
 
 ## 项目定位
 
@@ -32,7 +32,18 @@ npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx"
 npm run export:pdf -- --creator "creator-id"
 ```
 
-当前这些命令还是占位，后续我们进入项目后再实现。
+当前可先使用样例归档模式验证本地闭环：
+
+```bash
+npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx"
+npm run export:pdf -- --creator "xxxx"
+```
+
+说明：
+
+- `collect` 当前会生成样例博主与样例笔记，并写入 `archives/<creator-id>/`
+- `export:pdf` 当前会生成真实 HTML 书稿，以及一个占位 `book.pdf`
+- 后续会把这条链路替换为 `Playwright` 真实采集和浏览器打印 PDF
 
 ## 目录说明
 
@@ -60,3 +71,21 @@ xhs-creator-archive/
 
 详细说明见 [合规与使用边界](./docs/LEGAL_AND_USAGE.md)。
 
+## 当前原型输出
+
+执行一次样例流程后，目录大致如下：
+
+```text
+archives/
+  creator-id/
+    creator.json
+    notes/
+      creator-id-001.json
+      creator-id-002.json
+      creator-id-003.json
+    media/
+    exports/
+      book.html
+      book.pdf
+    logs/
+```
