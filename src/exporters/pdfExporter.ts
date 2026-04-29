@@ -1,5 +1,7 @@
-import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+
+import { chromium } from "playwright";
 
 import { readCreatorArchive } from "../storage/archiveStore.js";
 import { exportHtmlBook } from "./htmlExporter.js";
@@ -22,22 +24,49 @@ export async function exportCreatorPdf(input: ExportPdfInput): Promise<ExportPdf
     template: input.template
   });
   const pdfPath = path.join(path.dirname(htmlPath), "book.pdf");
+  const browser = await chromium.launch({
+    executablePath: resolveChromiumExecutablePath()
+  });
 
-  await fs.writeFile(
-    pdfPath,
-    [
-      "PDF placeholder",
-      `creatorId=${input.creatorId}`,
-      `template=${input.template ?? "timeline"}`,
-      `generatedAt=${new Date().toISOString()}`,
-      `htmlPath=${htmlPath}`,
-      "Next step: replace this placeholder with real browser-based PDF printing."
-    ].join("\n"),
-    "utf8"
-  );
+  try {
+    const page = await browser.newPage();
+    await page.goto(pathToFileURL(path.resolve(htmlPath)).href, {
+      waitUntil: "networkidle"
+    });
+    await page.pdf({
+      path: pdfPath,
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "16mm",
+        right: "14mm",
+        bottom: "18mm",
+        left: "14mm"
+      }
+    });
+  } finally {
+    await browser.close();
+  }
 
   return {
     htmlPath,
     pdfPath
   };
+}
+
+function resolveChromiumExecutablePath(): string | undefined {
+  const candidate = path.join(
+    process.env.HOME ?? "",
+    "Library",
+    "Caches",
+    "ms-playwright",
+    "chromium-1217",
+    "chrome-mac-arm64",
+    "Google Chrome for Testing.app",
+    "Contents",
+    "MacOS",
+    "Google Chrome for Testing"
+  );
+
+  return process.platform === "darwin" ? candidate : undefined;
 }

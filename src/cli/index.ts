@@ -2,6 +2,8 @@ import { collectCreator } from "../collectors/xhsCollector.js";
 import { exportCreatorPdf } from "../exporters/pdfExporter.js";
 
 const [, , command, subCommandOrArg, ...rest] = process.argv;
+const supportedTemplates = ["timeline", "print-compact"] as const;
+type SupportedTemplate = (typeof supportedTemplates)[number];
 
 function printHelp(): void {
   console.log(`
@@ -50,19 +52,20 @@ async function main(): Promise<void> {
       throw new Error("Missing --creator <creator-id>.");
     }
 
-    if (templateValue && templateValue !== "timeline" && templateValue !== "print-compact") {
+    if (templateValue && !isSupportedTemplate(templateValue)) {
       throw new Error("Invalid --template value. Use timeline or print-compact.");
     }
 
+    const resolvedTemplate = resolveTemplate(templateValue);
     const result = await exportCreatorPdf({
       creatorId,
-      template: templateValue
+      template: resolvedTemplate
     });
 
     console.log(`Exported book for creator: ${creatorId}`);
     console.log(`HTML path: ${result.htmlPath}`);
     console.log(`PDF path: ${result.pdfPath}`);
-    console.log("Current PDF output is a placeholder file. Use the HTML file for layout review.");
+    console.log("Generated a real PDF from the local HTML archive.");
     return;
   }
 
@@ -74,3 +77,15 @@ main().catch((error: unknown) => {
   console.error(message);
   process.exitCode = 1;
 });
+
+function isSupportedTemplate(value: string): value is SupportedTemplate {
+  return supportedTemplates.includes(value as SupportedTemplate);
+}
+
+function resolveTemplate(value: string | undefined): SupportedTemplate | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return isSupportedTemplate(value) ? value : undefined;
+}
