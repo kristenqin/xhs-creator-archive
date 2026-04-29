@@ -10,11 +10,11 @@ function printHelp(): void {
 XHS Creator Archive
 
 Usage:
-  npm run collect -- <creator-profile-url>
+  npm run collect -- <creator-profile-url> [--sample] [--limit 12]
   npm run export:pdf -- --creator <creator-id>
 
 Current status:
-  Phase 1 local archive flow is available with sample content output.
+  Real browser collection is available for visible note-card capture.
 `);
 }
 
@@ -26,19 +26,32 @@ async function main(): Promise<void> {
 
   if (command === "collect") {
     const profileUrl = subCommandOrArg;
+    const sampleMode = rest.includes("--sample");
+    const limitFlagIndex = rest.indexOf("--limit");
+    const limitValue = limitFlagIndex >= 0 ? rest.at(limitFlagIndex + 1) : undefined;
 
     if (!profileUrl) {
       throw new Error("Missing creator profile URL.");
     }
 
+    if (limitValue && !/^\d+$/.test(limitValue)) {
+      throw new Error("Invalid --limit value. Use a positive integer.");
+    }
+
     const result = await collectCreator({
-      profileUrl
+      profileUrl,
+      mode: sampleMode ? "sample" : "browser",
+      limit: limitValue ? Number(limitValue) : undefined
     });
 
     console.log(`Created local archive for ${result.creator.nickname} (${result.creator.id})`);
     console.log(`Archive path: ${result.archiveRoot}`);
     console.log(`Saved notes: ${result.notes.length}`);
-    console.log("Collector is currently running in sample archive mode.");
+    console.log(
+      sampleMode
+        ? "Collection completed in sample mode."
+        : "Collection completed from the visible browser page."
+    );
     return;
   }
 

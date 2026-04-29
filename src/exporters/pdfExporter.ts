@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 
 import { chromium } from "playwright";
 
+import { resolvePlaywrightChromiumExecutablePath } from "../runtime/playwrightBrowser.js";
 import { readCreatorArchive } from "../storage/archiveStore.js";
 import { exportHtmlBook } from "./htmlExporter.js";
 
@@ -25,7 +26,7 @@ export async function exportCreatorPdf(input: ExportPdfInput): Promise<ExportPdf
   });
   const pdfPath = path.join(path.dirname(htmlPath), "book.pdf");
   const browser = await chromium.launch({
-    executablePath: resolveChromiumExecutablePath()
+    executablePath: resolvePlaywrightChromiumExecutablePath()
   });
 
   try {
@@ -52,21 +53,4 @@ export async function exportCreatorPdf(input: ExportPdfInput): Promise<ExportPdf
     htmlPath,
     pdfPath
   };
-}
-
-function resolveChromiumExecutablePath(): string | undefined {
-  const candidate = path.join(
-    process.env.HOME ?? "",
-    "Library",
-    "Caches",
-    "ms-playwright",
-    "chromium-1217",
-    "chrome-mac-arm64",
-    "Google Chrome for Testing.app",
-    "Contents",
-    "MacOS",
-    "Google Chrome for Testing"
-  );
-
-  return process.platform === "darwin" ? candidate : undefined;
 }

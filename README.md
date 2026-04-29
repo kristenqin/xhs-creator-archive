@@ -2,7 +2,7 @@
 
 一个面向个人使用的“小红书优质博主离线归档成书工具”项目骨架。
 
-当前阶段已经进入第一版原型：可以生成样例归档，并导出可打印 HTML 书稿和占位 PDF 文件，后续再逐步接入真实采集。
+当前阶段已经进入第一版原型：可以生成本地归档，并导出可打印 HTML 书稿和真实 PDF 文件，后续继续补强真实采集深度。
 
 ## 项目定位
 
@@ -36,14 +36,17 @@ npm run export:pdf -- --creator "creator-id"
 
 ```bash
 npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx"
+npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx" --sample
 npm run export:pdf -- --creator "xxxx"
 ```
 
 说明：
 
-- `collect` 当前会生成样例博主与样例笔记，并写入 `archives/<creator-id>/`
-- `export:pdf` 当前会生成真实 HTML 书稿，以及一个占位 `book.pdf`
-- 后续会把这条链路替换为 `Playwright` 真实采集和浏览器打印 PDF
+- `collect` 默认会启动本地浏览器，由你手动登录后采集当前页面可见的笔记卡片
+- `collect --sample` 会生成样例博主与样例笔记，并写入 `archives/<creator-id>/`
+- `collect --limit 12` 可以限制本次最多保存多少条列表卡片
+- `export:pdf` 已经会把 HTML 真实打印成 PDF
+- 当前真实采集仍处于第一步，只保存列表卡片信息，详情正文和图片下载后续补充
 
 ## 目录说明
 
