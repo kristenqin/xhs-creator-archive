@@ -10,11 +10,11 @@ function printHelp(): void {
 XHS Creator Archive
 
 Usage:
-  npm run collect -- <creator-profile-url> [--sample] [--limit 12]
+  npm run collect -- <creator-profile-url> [--sample] [--limit 12] [--links-only] [--detail-only <note-url>] [--debug-dir debug/run-1] [--profile-dir .browser-profile/xhs-default]
   npm run export:pdf -- --creator <creator-id>
 
 Current status:
-  Real browser collection is available for visible note-card capture.
+  Real browser collection supports faster testing modes.
 `);
 }
 
@@ -27,8 +27,15 @@ async function main(): Promise<void> {
   if (command === "collect") {
     const profileUrl = subCommandOrArg;
     const sampleMode = rest.includes("--sample");
+    const linksOnly = rest.includes("--links-only");
     const limitFlagIndex = rest.indexOf("--limit");
     const limitValue = limitFlagIndex >= 0 ? rest.at(limitFlagIndex + 1) : undefined;
+    const detailOnlyFlagIndex = rest.indexOf("--detail-only");
+    const detailOnlyUrl = detailOnlyFlagIndex >= 0 ? rest.at(detailOnlyFlagIndex + 1) : undefined;
+    const debugDirFlagIndex = rest.indexOf("--debug-dir");
+    const debugDir = debugDirFlagIndex >= 0 ? rest.at(debugDirFlagIndex + 1) : undefined;
+    const profileDirFlagIndex = rest.indexOf("--profile-dir");
+    const profileDir = profileDirFlagIndex >= 0 ? rest.at(profileDirFlagIndex + 1) : undefined;
 
     if (!profileUrl) {
       throw new Error("Missing creator profile URL.");
@@ -41,17 +48,39 @@ async function main(): Promise<void> {
     const result = await collectCreator({
       profileUrl,
       mode: sampleMode ? "sample" : "browser",
-      limit: limitValue ? Number(limitValue) : undefined
+      limit: limitValue ? Number(limitValue) : undefined,
+      linksOnly,
+      detailOnlyUrl,
+      debugDir,
+      profileDir
     });
 
     console.log(`Created local archive for ${result.creator.nickname} (${result.creator.id})`);
     console.log(`Archive path: ${result.archiveRoot}`);
     console.log(`Saved notes: ${result.notes.length}`);
-    console.log(
-      sampleMode
-        ? "Collection completed in sample mode."
-        : "Collection completed from the visible browser page."
-    );
+    if (debugDir) {
+      console.log(`Debug artifacts: ${debugDir}`);
+    }
+    if (profileDir) {
+      console.log(`Browser profile dir: ${profileDir}`);
+    }
+
+    if (sampleMode) {
+      console.log("Collection completed in sample mode.");
+      return;
+    }
+
+    if (detailOnlyUrl) {
+      console.log("Collection completed in detail-only mode.");
+      return;
+    }
+
+    if (linksOnly) {
+      console.log("Collection completed in links-only mode.");
+      return;
+    }
+
+    console.log("Collection completed from the visible browser page.");
     return;
   }
 

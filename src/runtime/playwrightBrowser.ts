@@ -25,3 +25,11 @@ export function resolvePlaywrightChromiumExecutablePath(): string | undefined {
 
   return macExecutableCandidates.find((candidate) => fs.existsSync(candidate));
 }
+
+export function resolvePersistentProfileDir(customDir?: string): string {
+  if (customDir) {
+    return customDir;
+  }
+
+  return path.join(process.cwd(), ".browser-profile", "xhs-default");
+}

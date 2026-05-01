@@ -37,16 +37,25 @@ npm run export:pdf -- --creator "creator-id"
 ```bash
 npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx"
 npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx" --sample
+npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx" --links-only --limit 20
+npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx" --detail-only "https://www.xiaohongshu.com/explore/xxxx" --debug-dir debug/run-1
+npm run collect -- "https://www.xiaohongshu.com/user/profile/xxxx" --profile-dir .browser-profile/xhs-main
 npm run export:pdf -- --creator "xxxx"
 ```
 
 说明：
 
-- `collect` 默认会启动本地浏览器，由你手动登录后采集当前页面可见的笔记卡片
+- `collect` 默认会启动本地浏览器，由你手动登录后自动下翻主页，收集笔记链接并逐条进入详情页抓取标题、正文和图片
 - `collect --sample` 会生成样例博主与样例笔记，并写入 `archives/<creator-id>/`
-- `collect --limit 12` 可以限制本次最多保存多少条列表卡片
+- `collect --limit 12` 可以限制本次最多抓取多少篇笔记
+- `collect --links-only` 只测试主页下翻和笔记链接收集，不进入详情页
+- `collect --detail-only "<note-url>"` 只测试单篇详情页抓取，非常适合定位登录门禁或跳转问题
+- `collect --debug-dir debug/run-1` 会保存失败页的 HTML、截图和判定信息，便于复盘
+- `collect` 默认会复用本地浏览器用户目录 `.browser-profile/xhs-default`，首次登录后后续测试会尽量沿用同一会话
+- `collect --profile-dir .browser-profile/xhs-main` 可以切换到指定登录态目录，适合区分主账号和实验账号
 - `export:pdf` 已经会把 HTML 真实打印成 PDF
-- 当前真实采集仍处于第一步，只保存列表卡片信息，详情正文和图片下载后续补充
+- 当前真实采集会保存详情页文本和图片 URL，但图片文件本地下载还未实现
+- 详情页如果被登录弹层或平台重定向劫持，当前版本会先暂停并允许你手动恢复一次，再决定是否跳过
 
 ## 目录说明
 
